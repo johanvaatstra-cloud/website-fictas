@@ -46,22 +46,25 @@ const channels = [
   },
 ]
 
-const FORMSPREE_ID = 'YOUR_FORMSPREE_ID'
-
 const handleSubmit = async () => {
   submitting.value = true
   try {
-    const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+    const res = await fetch('https://formspree.io/f/xykaglkq', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({
-        ...form,
-        _subject: `Contact: ${form.topic} — ${form.name} (${form.company || 'no company'})`,
+        subject: 'Contact - Fictas',
+        name: form.name,
+        email: form.email,
+        company: form.company,
+        topic: form.topic,
+        message: form.message,
       }),
     })
     if (res.ok) submitted.value = true
-  } catch {
-    submitted.value = true
+    else alert('Er ging iets mis. Probeer het opnieuw.')
+  } catch (e) {
+    alert('Netwerkfout: ' + e.message)
   } finally {
     submitting.value = false
   }

@@ -21,6 +21,7 @@ const handleSubmit = async () => {
       method: 'POST',
       headers: { 'Accept': 'application/json' },
       body: JSON.stringify({
+        subject: 'Rapport aanvraag - Fictas',
         first_name: form.value.firstName,
         last_name: form.value.lastName,
         email: form.value.email,
@@ -77,9 +78,9 @@ const contents = [
         <div class="flex justify-center mb-7">
           <FileText class="w-20 h-20 text-blue-500" stroke-width="1.5" />
         </div>
-        <h2 class="text-4xl font-bold text-gray-900 mb-5">Report onderweg!</h2>
+        <h2 class="text-4xl font-bold text-gray-900 mb-5">Aanvraag ontvangen!</h2>
         <p class="text-gray-600 text-lg leading-relaxed mb-10">
-          Check je werk e-mail. Je ontvangt de downloadlink voor het Full Volume Testing Report binnen enkele minuten.
+          We sturen je de downloadlink voor het Full Volume Testing Report binnen 1 werkdag per e-mail toe.
         </p>
         <div class="bg-gray-50 border border-gray-200 rounded-2xl p-7 text-left mb-10">
           <h3 class="text-gray-900 font-semibold mb-5">Het rapport bevat:</h3>

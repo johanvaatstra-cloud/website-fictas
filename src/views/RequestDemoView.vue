@@ -25,6 +25,7 @@ const handleSubmit = async () => {
       method: 'POST',
       headers: { 'Accept': 'application/json' },
       body: JSON.stringify({
+        subject: 'Demo aanvraag - Fictas',
         first_name: form.value.firstName,
         last_name: form.value.lastName,
         email: form.value.email,
