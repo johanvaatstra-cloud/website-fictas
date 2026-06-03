@@ -11,7 +11,7 @@ const layers = [
     label: 'API Gateway',
     color: 'border-blue-500/40 bg-blue-500/5',
     labelColor: 'text-blue-400',
-    items: ['REST API', 'Auth / OAuth 2.0', 'Rate Limiting'],
+    items: ['REST API', 'Auth / OAuth 2.0'],
     itemStyle: 'bg-blue-500/10 border-blue-500/20 text-blue-300',
   },
   {
@@ -25,7 +25,7 @@ const layers = [
     label: 'Data Layer',
     color: 'border-emerald-500/40 bg-emerald-500/5',
     labelColor: 'text-emerald-400',
-    items: ['Azure SQL DB', 'Cosmos DB', 'Redis Cache', 'Blob Storage'],
+    items: ['Azure SQL DB', 'Cosmos DB', 'Blob Storage'],
     itemStyle: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300',
   },
   {
@@ -40,7 +40,6 @@ const layers = [
 const specs = [
   { label: 'Runtime', value: 'Azure Service Fabric' },
   { label: 'Database', value: 'Azure SQL + Cosmos DB' },
-  { label: 'Cache', value: 'Azure Redis Cache' },
   { label: 'Auth', value: 'OAuth 2.0 / JWT' },
   { label: 'Protocol', value: 'REST / JSON + ISO 8583' },
   { label: 'Regions', value: 'Multi-region ready' },
