@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { FileText } from 'lucide-vue-next'
 import SectionLabel from '../components/shared/SectionLabel.vue'
-import { FORMS } from '../config/forms.js'
 
 const submitted = ref(false)
 const loading = ref(false)
@@ -16,24 +15,31 @@ const form = ref({
   email: '',
 })
 
-async function handleSubmit() {
+const W3F_KEY = 'fc6ca080-52a9-4899-bab1-9f19b2c119e3'
+
+const submitForm = async () => {
   loading.value = true
   try {
-    const response = await fetch(FORMS.endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({
-        access_key: FORMS.accessKey,
-        subject: 'Rapport aanvraag - Fictas',
-        ...form.value,
-      }),
+    const formData = new FormData()
+    formData.append('access_key', W3F_KEY)
+    formData.append('subject', 'Rapport aanvraag - Fictas')
+    formData.append('from_name', 'Fictas Website')
+    Object.keys(form.value).forEach(key => {
+      formData.append(key, form.value[key])
     })
-    if (response.ok) {
+
+    const response = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: formData,
+    })
+
+    const data = await response.json()
+    if (data.success) {
       submitted.value = true
     } else {
       alert('Er ging iets mis. Probeer het opnieuw.')
     }
-  } catch {
+  } catch (error) {
     alert('Er ging iets mis. Probeer het opnieuw.')
   } finally {
     loading.value = false
@@ -168,7 +174,7 @@ const contents = [
           <p class="text-gray-500 text-lg">We send the download link directly to your work email.</p>
         </div>
 
-        <form @submit.prevent="handleSubmit" class="space-y-5">
+        <form @submit.prevent="submitForm" class="space-y-5">
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>

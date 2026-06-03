@@ -1,0 +1,1 @@
+import{o as t,e as r,t as n}from"./index-DgAVa3Ng.js";const o={class:"inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20"},c={__name:"SectionLabel",props:{text:{type:String,required:!0}},setup(e){return(s,a)=>(t(),r("span",o,n(e.text),1))}};export{c as _};
