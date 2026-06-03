@@ -22,10 +22,14 @@ const form = ref({
 async function handleSubmit() {
   loading.value = true
   try {
-    const response = await fetch(FORMS.demo, {
+    const response = await fetch(FORMS.endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(form.value),
+      body: JSON.stringify({
+        access_key: FORMS.accessKey,
+        subject: 'Demo aanvraag - Fictas',
+        ...form.value,
+      }),
     })
     if (response.ok) {
       submitted.value = true
