@@ -17,24 +17,20 @@ const form = ref({
 const handleSubmit = async () => {
   loading.value = true
   try {
-    const formData = new FormData()
-    formData.append('access_key', import.meta.env.VITE_W3F_KEY)
-    formData.append('subject', 'Rapport aanvraag - Fictas')
-    formData.append('from_name', 'Fictas Website')
-    formData.append('first_name', form.value.firstName)
-    formData.append('last_name', form.value.lastName)
-    formData.append('email', form.value.email)
-    formData.append('company', form.value.company)
-
-    const res = await fetch(import.meta.env.VITE_W3F_URL, {
+    const res = await fetch('https://formspree.io/f/xykaglkq', {
       method: 'POST',
-      body: formData,
+      headers: { 'Accept': 'application/json' },
+      body: JSON.stringify({
+        first_name: form.value.firstName,
+        last_name: form.value.lastName,
+        email: form.value.email,
+        company: form.value.company
+      })
     })
-    const data = await res.json()
-    if (data.success) {
+    if (res.ok) {
       submitted.value = true
     } else {
-      alert('Er ging iets mis: ' + data.message)
+      alert('Er ging iets mis. Probeer het opnieuw.')
     }
   } catch (e) {
     alert('Netwerkfout: ' + e.message)
