@@ -18,49 +18,49 @@ const form = ref({
   volume: '',
 })
 
-const W3F_KEY = 'fc6ca080-52a9-4899-bab1-9f19b2c119e3'
-
-const submitForm = async () => {
+const handleSubmit = async () => {
   loading.value = true
   try {
     const formData = new FormData()
-    formData.append('access_key', W3F_KEY)
+    formData.append('access_key', import.meta.env.VITE_W3F_KEY)
     formData.append('subject', 'Demo aanvraag - Fictas')
-    formData.append('from_name', 'Fictas Website')
-    Object.keys(form.value).forEach(key => {
-      formData.append(key, form.value[key])
-    })
+    formData.append('first_name', form.value.firstName)
+    formData.append('last_name', form.value.lastName)
+    formData.append('email', form.value.email)
+    formData.append('company', form.value.company)
+    formData.append('phone', form.value.phone)
+    formData.append('use_case', form.value.useCase)
+    formData.append('monthly_volume', form.value.volume)
 
-    const response = await fetch('https://api.web3forms.com/submit', {
+    const res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       body: formData,
     })
-
-    const data = await response.json()
+    const data = await res.json()
     if (data.success) {
       submitted.value = true
     } else {
-      alert('Er ging iets mis. Probeer het opnieuw.')
+      alert('Er ging iets mis: ' + data.message)
     }
-  } catch (error) {
-    alert('Er ging iets mis. Probeer het opnieuw.')
+  } catch (e) {
+    alert('Netwerkfout: ' + e.message)
   } finally {
     loading.value = false
   }
 }
 
 const steps = [
-  { n: '01', title: 'Submit your request',          desc: 'Fill in the form — takes under 2 minutes.' },
+  { n: '01', title: 'Submit your request',             desc: 'Fill in the form — takes under 2 minutes.' },
   { n: '02', title: 'We review within 1 business day', desc: 'Our team qualifies each request to tailor the demo to your use case.' },
-  { n: '03', title: 'Personalised demo link',        desc: 'You get secure access to a live Control Tower loaded with demo data.' },
-  { n: '04', title: 'Follow-up call',                desc: 'We schedule a call to walk through your specific requirements.' },
+  { n: '03', title: 'Personalised demo link',          desc: 'You get secure access to a live Control Tower loaded with demo data.' },
+  { n: '04', title: 'Follow-up call',                  desc: 'We schedule a call to walk through your specific requirements.' },
 ]
 
 const social = [
-  { label: '275,000+',  sub: 'transactions tested' },
-  { label: '45.66ms',   sub: 'avg response time' },
-  { label: '300,000',   sub: 'active accounts' },
-  { label: 'PCI DSS',   sub: 'compliant' },
+  { label: '275,000+', sub: 'transactions tested' },
+  { label: '45.66ms',  sub: 'avg response time' },
+  { label: '300,000',  sub: 'active accounts' },
+  { label: 'PCI DSS',  sub: 'compliant' },
 ]
 </script>
 
@@ -161,7 +161,7 @@ const social = [
           <div class="bg-white/5 border border-white/15 rounded-3xl p-8">
             <h2 class="text-white font-bold text-xl mb-6">Your details</h2>
 
-            <form @submit.prevent="submitForm" class="space-y-5">
+            <form @submit.prevent="handleSubmit" class="space-y-5">
 
               <!-- Name row -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

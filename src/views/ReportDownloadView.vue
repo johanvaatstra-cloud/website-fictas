@@ -15,32 +15,30 @@ const form = ref({
   email: '',
 })
 
-const W3F_KEY = 'fc6ca080-52a9-4899-bab1-9f19b2c119e3'
-
-const submitForm = async () => {
+const handleSubmit = async () => {
   loading.value = true
   try {
     const formData = new FormData()
-    formData.append('access_key', W3F_KEY)
+    formData.append('access_key', import.meta.env.VITE_W3F_KEY)
     formData.append('subject', 'Rapport aanvraag - Fictas')
-    formData.append('from_name', 'Fictas Website')
-    Object.keys(form.value).forEach(key => {
-      formData.append(key, form.value[key])
-    })
+    formData.append('first_name', form.value.firstName)
+    formData.append('last_name', form.value.lastName)
+    formData.append('email', form.value.email)
+    formData.append('company', form.value.company)
+    formData.append('job_title', form.value.jobTitle)
 
-    const response = await fetch('https://api.web3forms.com/submit', {
+    const res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       body: formData,
     })
-
-    const data = await response.json()
+    const data = await res.json()
     if (data.success) {
       submitted.value = true
     } else {
-      alert('Er ging iets mis. Probeer het opnieuw.')
+      alert('Er ging iets mis: ' + data.message)
     }
-  } catch (error) {
-    alert('Er ging iets mis. Probeer het opnieuw.')
+  } catch (e) {
+    alert('Netwerkfout: ' + e.message)
   } finally {
     loading.value = false
   }
@@ -174,7 +172,7 @@ const contents = [
           <p class="text-gray-500 text-lg">We send the download link directly to your work email.</p>
         </div>
 
-        <form @submit.prevent="submitForm" class="space-y-5">
+        <form @submit.prevent="handleSubmit" class="space-y-5">
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
