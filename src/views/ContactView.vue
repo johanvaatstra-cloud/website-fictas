@@ -62,9 +62,9 @@ const handleSubmit = async () => {
       }),
     })
     if (res.ok) submitted.value = true
-    else alert('Er ging iets mis. Probeer het opnieuw.')
+    else alert('Something went wrong. Please try again.')
   } catch (e) {
-    alert('Netwerkfout: ' + e.message)
+    alert('Network error: ' + e.message)
   } finally {
     submitting.value = false
   }

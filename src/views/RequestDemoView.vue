@@ -25,7 +25,7 @@ const handleSubmit = async () => {
       method: 'POST',
       headers: { 'Accept': 'application/json' },
       body: JSON.stringify({
-        subject: 'Demo aanvraag - Fictas',
+        subject: 'Demo request - Fictas',
         first_name: form.value.firstName,
         last_name: form.value.lastName,
         email: form.value.email,
@@ -38,10 +38,10 @@ const handleSubmit = async () => {
     if (res.ok) {
       submitted.value = true
     } else {
-      alert('Er ging iets mis. Probeer het opnieuw.')
+      alert('Something went wrong. Please try again.')
     }
   } catch (e) {
-    alert('Netwerkfout: ' + e.message)
+    alert('Network error: ' + e.message)
   } finally {
     loading.value = false
   }
@@ -72,27 +72,27 @@ const social = [
         <CheckCircle class="w-20 h-20 text-green-400" stroke-width="1.5" />
       </div>
 
-      <h1 class="text-4xl font-bold text-white mb-5">Aanvraag ontvangen</h1>
+      <h1 class="text-4xl font-bold text-white mb-5">Request received</h1>
 
       <p class="text-gray-300 text-lg leading-relaxed mb-10">
-        Bedankt voor je interesse in Fictas Control Tower. We beoordelen je aanvraag
-        en sturen je binnen 1 werkdag een e-mail met directe toegang tot de demo omgeving.
+        Thanks for your interest in Fictas Control Tower. We'll review your request
+        and send you an email with direct access to the demo environment within 1 business day.
       </p>
 
       <div class="bg-white/5 border border-white/10 rounded-2xl p-7 text-left mb-10">
-        <h3 class="text-white font-semibold mb-5">Wat kun je verwachten?</h3>
+        <h3 class="text-white font-semibold mb-5">What to expect</h3>
         <div class="space-y-4">
           <div class="flex items-start gap-4">
             <span class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">①</span>
-            <p class="text-gray-300 text-sm leading-relaxed">Wij beoordelen je aanvraag</p>
+            <p class="text-gray-300 text-sm leading-relaxed">We review your request</p>
           </div>
           <div class="flex items-start gap-4">
             <span class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">②</span>
-            <p class="text-gray-300 text-sm leading-relaxed">Je ontvangt een persoonlijke e-mail met een directe toegangslink</p>
+            <p class="text-gray-300 text-sm leading-relaxed">You'll receive a personalised email with a direct access link</p>
           </div>
           <div class="flex items-start gap-4">
             <span class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">③</span>
-            <p class="text-gray-300 text-sm leading-relaxed">Één klik — direct ingelogd in de demo omgeving</p>
+            <p class="text-gray-300 text-sm leading-relaxed">One click — direct access to the demo environment</p>
           </div>
         </div>
       </div>
@@ -101,7 +101,7 @@ const social = [
         to="/"
         class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-medium transition-colors"
       >
-        ← Terug naar home
+        ← Back to home
       </RouterLink>
     </div>
   </div>
@@ -226,7 +226,7 @@ const social = [
               <div class="pt-2">
                 <button type="submit" :disabled="loading"
                   class="w-full bg-orange-500 hover:bg-orange-400 disabled:opacity-60 text-white font-semibold py-4 rounded-xl transition-colors text-base">
-                  {{ loading ? 'Versturen...' : 'Request Demo Access →' }}
+                  {{ loading ? 'Submitting...' : 'Request Demo Access →' }}
                 </button>
               </div>
 

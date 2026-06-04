@@ -198,11 +198,11 @@ function fictasForVolume(vol) {
             <!-- Monthly model rows -->
             <template v-if="model === 'monthly'">
               <div class="flex justify-between text-sm mb-2">
-                <span class="text-gray-500">Licentiekosten</span>
-                <span class="font-medium text-gray-400 italic">Op aanvraag</span>
+                <span class="text-gray-500">License costs</span>
+                <span class="font-medium text-gray-400 italic">On request</span>
               </div>
               <div class="flex justify-between text-sm mb-4">
-                <span class="text-gray-500">Azure kosten</span>
+                <span class="text-gray-500">Azure costs</span>
                 <span class="font-semibold text-gray-800">{{ formatEuro(AZURE_PER_MONTH) }}</span>
               </div>
             </template>
@@ -210,18 +210,18 @@ function fictasForVolume(vol) {
             <!-- One-Time model rows -->
             <template v-else>
               <div class="flex justify-between text-sm mb-2">
-                <span class="text-gray-500">Licentiekosten</span>
-                <span class="font-medium text-gray-400 italic">Op aanvraag</span>
+                <span class="text-gray-500">License costs</span>
+                <span class="font-medium text-gray-400 italic">On request</span>
               </div>
               <div class="flex justify-between text-sm mb-4">
-                <span class="text-gray-500">Azure kosten</span>
+                <span class="text-gray-500">Azure costs</span>
                 <span class="font-semibold text-gray-800">{{ formatEuro(AZURE_PER_MONTH) }}</span>
               </div>
             </template>
 
             <!-- Total row -->
             <div class="flex justify-between text-sm border-t border-gray-200 pt-3">
-              <span class="text-xs text-gray-400 italic self-center">Azure subtotaal (excl. licentiekosten)</span>
+              <span class="text-xs text-gray-400 italic self-center">Azure subtotal (excl. license costs)</span>
               <span class="font-bold text-gray-900 tabular-nums">{{ formatEuro(monthlyCost) }}</span>
             </div>
 

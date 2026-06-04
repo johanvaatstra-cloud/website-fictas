@@ -21,7 +21,7 @@ const handleSubmit = async () => {
       method: 'POST',
       headers: { 'Accept': 'application/json' },
       body: JSON.stringify({
-        subject: 'Rapport aanvraag - Fictas',
+        subject: 'Report request - Fictas',
         first_name: form.value.firstName,
         last_name: form.value.lastName,
         email: form.value.email,
@@ -31,10 +31,10 @@ const handleSubmit = async () => {
     if (res.ok) {
       submitted.value = true
     } else {
-      alert('Er ging iets mis. Probeer het opnieuw.')
+      alert('Something went wrong. Please try again.')
     }
   } catch (e) {
-    alert('Netwerkfout: ' + e.message)
+    alert('Network error: ' + e.message)
   } finally {
     loading.value = false
   }
@@ -78,12 +78,12 @@ const contents = [
         <div class="flex justify-center mb-7">
           <FileText class="w-20 h-20 text-blue-500" stroke-width="1.5" />
         </div>
-        <h2 class="text-4xl font-bold text-gray-900 mb-5">Aanvraag ontvangen!</h2>
+        <h2 class="text-4xl font-bold text-gray-900 mb-5">Request received!</h2>
         <p class="text-gray-600 text-lg leading-relaxed mb-10">
-          We sturen je de downloadlink voor het Full Volume Testing Report binnen 1 werkdag per e-mail toe.
+          We'll email you the download link for the Full Volume Testing Report within 1 business day.
         </p>
         <div class="bg-gray-50 border border-gray-200 rounded-2xl p-7 text-left mb-10">
-          <h3 class="text-gray-900 font-semibold mb-5">Het rapport bevat:</h3>
+          <h3 class="text-gray-900 font-semibold mb-5">The report includes:</h3>
           <div class="space-y-3">
             <div v-for="item in contents" :key="item.n" class="flex items-center gap-3">
               <span class="w-7 h-7 rounded-full bg-blue-500/10 text-blue-600 text-xs font-bold flex items-center justify-center flex-shrink-0">{{ item.n }}</span>
@@ -92,7 +92,7 @@ const contents = [
           </div>
         </div>
         <RouterLink to="/" class="inline-flex items-center gap-2 text-blue-500 hover:text-blue-600 font-medium transition-colors">
-          ← Terug naar home
+          ← Back to home
         </RouterLink>
       </div>
     </section>
@@ -152,7 +152,7 @@ const contents = [
           <div class="pt-2">
             <button type="submit" :disabled="loading"
               class="w-full bg-orange-500 hover:bg-orange-400 disabled:opacity-60 text-white font-semibold py-4 rounded-xl transition-colors text-base">
-              {{ loading ? 'Versturen...' : 'Send me the report →' }}
+              {{ loading ? 'Submitting...' : 'Send me the report →' }}
             </button>
           </div>
 

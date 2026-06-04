@@ -24,13 +24,13 @@ import InfrastructureCosts from '../components/pricing/InfrastructureCosts.vue'
           In-house issuing vs. SaaS
         </h1>
         <p class="text-gray-300 text-xl max-w-2xl mx-auto mb-6">
-          Licentiekosten beschikbaar op aanvraag. Bereken hieronder de infrastructuurkosten en vergelijk met SaaS-platforms.
+          License pricing available on request. Use the calculator below to compare infrastructure costs against SaaS platforms.
         </p>
         <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
-          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> Geen per-transactie kosten</span>
-          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> 80-100 TPS inbegrepen</span>
+          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> No per-transaction fees</span>
+          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> 80-100 TPS included</span>
           <span class="flex items-center gap-2"><span class="text-green-400">✓</span> PCI DSS ready</span>
-          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> Volledige broncode</span>
+          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> Full source code</span>
         </div>
       </div>
     </section>
@@ -39,7 +39,7 @@ import InfrastructureCosts from '../components/pricing/InfrastructureCosts.vue'
     <section class="bg-white pt-16 pb-2">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <p class="text-gray-600 text-lg leading-relaxed">
-          Bereken hoeveel uw organisatie bespaart door in-house te issuen in plaats van een SaaS platform te gebruiken.
+          Calculate how much your organisation saves by issuing in-house instead of using a SaaS platform.
         </p>
       </div>
     </section>
@@ -54,7 +54,7 @@ import InfrastructureCosts from '../components/pricing/InfrastructureCosts.vue'
           to="/contact"
           class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white font-semibold px-8 py-4 rounded-xl transition-colors text-base"
         >
-          Ontvang een offerte op maat →
+          Request a custom quote →
         </RouterLink>
       </div>
     </section>
