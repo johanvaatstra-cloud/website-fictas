@@ -4,9 +4,7 @@ import { ChevronDown } from 'lucide-vue-next'
 import SectionLabel from '../shared/SectionLabel.vue'
 
 // ── Constants ──────────────────────────────────────────────
-const MONTHLY_FEE      = 8900
 const AZURE_PER_MONTH  = 2100
-const LICENSE_COST     = 189000
 const MARKET_AVG       = 0.25
 
 const AZURE_BREAKDOWN = [
@@ -42,13 +40,7 @@ const amortYears   = ref(36)
 const azureOpen    = ref(false)
 
 // ── Computed ────────────────────────────────────────────────
-const licensePerMonth = computed(() => LICENSE_COST / amortYears.value)
-
-const monthlyCost = computed(() =>
-  model.value === 'monthly'
-    ? MONTHLY_FEE
-    : licensePerMonth.value + AZURE_PER_MONTH
-)
+const monthlyCost = computed(() => AZURE_PER_MONTH)
 
 const costPerTransaction = computed(() => monthlyCost.value / transactions.value)
 
@@ -206,31 +198,31 @@ function fictasForVolume(vol) {
             <!-- Monthly model rows -->
             <template v-if="model === 'monthly'">
               <div class="flex justify-between text-sm mb-2">
-                <span class="text-gray-500">Subscription fee</span>
-                <span class="font-semibold text-gray-800">{{ formatEuro(MONTHLY_FEE) }}</span>
+                <span class="text-gray-500">Licentiekosten</span>
+                <span class="font-medium text-gray-400 italic">Op aanvraag</span>
               </div>
               <div class="flex justify-between text-sm mb-4">
-                <span class="text-gray-400 italic">Azure (included)</span>
-                <span class="text-gray-400 italic">{{ formatEuro(AZURE_PER_MONTH) }}</span>
+                <span class="text-gray-500">Azure kosten</span>
+                <span class="font-semibold text-gray-800">{{ formatEuro(AZURE_PER_MONTH) }}</span>
               </div>
             </template>
 
             <!-- One-Time model rows -->
             <template v-else>
               <div class="flex justify-between text-sm mb-2">
-                <span class="text-gray-500">License (amortized)</span>
-                <span class="font-semibold text-gray-800">{{ formatEuro(licensePerMonth) }}</span>
+                <span class="text-gray-500">Licentiekosten</span>
+                <span class="font-medium text-gray-400 italic">Op aanvraag</span>
               </div>
               <div class="flex justify-between text-sm mb-4">
-                <span class="text-gray-500">Azure costs</span>
+                <span class="text-gray-500">Azure kosten</span>
                 <span class="font-semibold text-gray-800">{{ formatEuro(AZURE_PER_MONTH) }}</span>
               </div>
             </template>
 
             <!-- Total row -->
-            <div class="flex justify-between text-sm font-bold border-t border-gray-200 pt-3">
-              <span class="text-gray-700">Total</span>
-              <span class="text-gray-900 tabular-nums">{{ formatEuro(monthlyCost) }}</span>
+            <div class="flex justify-between text-sm border-t border-gray-200 pt-3">
+              <span class="text-xs text-gray-400 italic self-center">Azure subtotaal (excl. licentiekosten)</span>
+              <span class="font-bold text-gray-900 tabular-nums">{{ formatEuro(monthlyCost) }}</span>
             </div>
 
             <!-- Azure accordion -->

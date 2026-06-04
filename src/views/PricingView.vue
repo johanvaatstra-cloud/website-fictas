@@ -1,6 +1,6 @@
 <script setup>
+import { RouterLink } from 'vue-router'
 import SectionLabel from '../components/shared/SectionLabel.vue'
-import PricingCards from '../components/pricing/PricingCards.vue'
 import CostCalculator from '../components/pricing/CostCalculator.vue'
 import InfrastructureCosts from '../components/pricing/InfrastructureCosts.vue'
 </script>
@@ -19,27 +19,45 @@ import InfrastructureCosts from '../components/pricing/InfrastructureCosts.vue'
         "
       ></div>
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <SectionLabel text="Transparent Pricing" />
+        <SectionLabel text="Pricing" />
         <h1 class="text-5xl md:text-6xl font-bold text-white mt-5 mb-4 tracking-tight">
-          Simple, Predictable Pricing
+          In-house issuing vs. SaaS
         </h1>
         <p class="text-gray-300 text-xl max-w-2xl mx-auto mb-6">
-          Own it outright or subscribe. Both options include the full Fictas platform.
+          Licentiekosten beschikbaar op aanvraag. Bereken hieronder de infrastructuurkosten en vergelijk met SaaS-platforms.
         </p>
         <div class="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
-          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> No per-transaction fees</span>
-          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> 80-100 TPS included</span>
+          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> Geen per-transactie kosten</span>
+          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> 80-100 TPS inbegrepen</span>
           <span class="flex items-center gap-2"><span class="text-green-400">✓</span> PCI DSS ready</span>
-          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> Cancel anytime (subscription)</span>
+          <span class="flex items-center gap-2"><span class="text-green-400">✓</span> Volledige broncode</span>
         </div>
       </div>
     </section>
 
-    <!-- Pricing cards -->
-    <PricingCards />
+    <!-- Calculator intro -->
+    <section class="bg-white pt-16 pb-2">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <p class="text-gray-600 text-lg leading-relaxed">
+          Bereken hoeveel uw organisatie bespaart door in-house te issuen in plaats van een SaaS platform te gebruiken.
+        </p>
+      </div>
+    </section>
 
     <!-- Cost calculator -->
     <CostCalculator />
+
+    <!-- CTA -->
+    <section class="bg-gray-50 py-14">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <RouterLink
+          to="/contact"
+          class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white font-semibold px-8 py-4 rounded-xl transition-colors text-base"
+        >
+          Ontvang een offerte op maat →
+        </RouterLink>
+      </div>
+    </section>
 
     <!-- Azure infrastructure breakdown + bottom CTA -->
     <InfrastructureCosts />
