@@ -44,7 +44,6 @@ function fictasMonthlyTotal(t) {
 }
 
 // ── Slider config ───────────────────────────────────────────
-const TABLE_VOLUMES = [10000, 50000, 100000, 500000, 1000000]
 const MIN = 10000
 const MAX = 1000000
 
@@ -60,13 +59,6 @@ const saasCost        = computed(() => calculateSaasCost(transactions.value))
 const fictasMonthly   = computed(() => fictasMonthlyTotal(transactions.value))
 const savingsMonthly  = computed(() => saasCost.value - fictasMonthly.value)
 const savingsOnetime  = computed(() => saasCost.value - TOTAL_ONETIME_AMORT)
-
-const closestVolume = computed(() =>
-  TABLE_VOLUMES.reduce((prev, curr) =>
-    Math.abs(curr - transactions.value) < Math.abs(prev - transactions.value)
-      ? curr : prev
-  )
-)
 
 // ── Format helpers ──────────────────────────────────────────
 function fEuro(val) {
@@ -204,72 +196,10 @@ function fNum(n) { return Math.round(n).toLocaleString('nl-NL') }
       </div>
 
       <!-- Footer note -->
-      <p class="text-xs text-gray-400 text-center mb-10 leading-relaxed">
+      <p class="text-xs text-gray-400 text-center leading-relaxed">
         SaaS cost includes €2,750 monthly platform fee plus tiered per-transaction pricing.
         License fee available on request.
       </p>
-
-      <!-- Comparison table -->
-      <div>
-        <h3 class="text-2xl font-bold text-gray-900 mb-1">Savings at Scale</h3>
-        <p class="text-gray-500 text-sm mb-6">
-          Estimated monthly savings vs SaaS — cumulative tiered pricing + €2,750 base fee
-        </p>
-
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div class="grid grid-cols-4 bg-gray-50 border-b border-gray-100 px-6 py-3">
-            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Transactions/mo
-            </span>
-            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
-              SaaS cost/mo
-            </span>
-            <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider text-right">
-              Monthly savings
-            </span>
-            <span class="text-xs font-semibold text-orange-500 uppercase tracking-wider text-right">
-              One-time savings
-            </span>
-          </div>
-
-          <div
-            v-for="vol in TABLE_VOLUMES"
-            :key="vol"
-            :class="[
-              'grid grid-cols-4 px-6 py-4 last:border-0 transition-colors',
-              closestVolume === vol
-                ? 'bg-blue-50 border-l-4 border-l-blue-400 border-b border-blue-100'
-                : 'border-b border-gray-50'
-            ]"
-          >
-            <span class="text-sm text-gray-700 font-medium self-center tabular-nums">
-              {{ fNum(vol) }}
-            </span>
-
-            <span class="text-sm text-gray-600 text-right self-center tabular-nums font-medium">
-              {{ fEuro(calculateSaasCost(vol)) }}
-            </span>
-
-            <span
-              class="text-sm font-bold text-right self-center tabular-nums"
-              :class="(calculateSaasCost(vol) - fictasMonthlyTotal(vol)) >= 0 ? 'text-blue-600' : 'text-gray-400'"
-            >
-              {{ (calculateSaasCost(vol) - fictasMonthlyTotal(vol)) >= 0 ? '+' : '' }}{{ fEuro(calculateSaasCost(vol) - fictasMonthlyTotal(vol)) }}
-            </span>
-
-            <span
-              class="text-sm font-bold text-right self-center tabular-nums"
-              :class="(calculateSaasCost(vol) - TOTAL_ONETIME_AMORT) >= 0 ? 'text-orange-500' : 'text-gray-400'"
-            >
-              {{ (calculateSaasCost(vol) - TOTAL_ONETIME_AMORT) >= 0 ? '+' : '' }}{{ fEuro(calculateSaasCost(vol) - TOTAL_ONETIME_AMORT) }}
-            </span>
-          </div>
-        </div>
-
-        <p class="text-xs text-gray-400 mt-3 text-center">
-          Fictas monthly cost = Azure infrastructure + license. Contact us for exact pricing.
-        </p>
-      </div>
 
     </div>
   </section>
