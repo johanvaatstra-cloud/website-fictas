@@ -3,18 +3,19 @@ import { ref, computed } from 'vue'
 import SectionLabel from '../shared/SectionLabel.vue'
 
 // ── Internal constants — never rendered in the DOM ──────────
-const AZURE_PER_MONTH     = 2100
-const MONTHLY_LICENSE     = 8900
-const ONETIME_LICENSE     = 189000
-const DEPRECIATION_MONTHS = 60
+const AZURE_PER_MONTH              = 2100
+const MONTHLY_LICENSE              = 8900
+const ONETIME_LICENSE              = 189000
+const DEPRECIATION_MONTHS         = 60
+const SAAS_BASE_FEE                = 2750
+const FICTAS_EXTRA_PER_TRANSACTION = 0.02   // monthly plan only, above 50 000 tx
 
-// Total monthly Fictas cost per plan (internal only)
-const TOTAL_MONTHLY       = AZURE_PER_MONTH + MONTHLY_LICENSE                          // 11 000
-const TOTAL_ONETIME_AMORT = AZURE_PER_MONTH + (ONETIME_LICENSE / DEPRECIATION_MONTHS) //  5 250
+// One-time amortised total (constant — internal only)
+const TOTAL_ONETIME_AMORT =
+  AZURE_PER_MONTH + ONETIME_LICENSE / DEPRECIATION_MONTHS   // 5 250
 
-// ── Cumulative tiered SaaS cost (like tax brackets) ─────────
-function calculateSaasCost(transactions) {
-  let cost = 0
+// ── SaaS cost: base fee + cumulative tiered per-tx pricing ──
+function calculateSaasCost(t) {
   const tiers = [
     { max: 10000,    rate: 0.20 },
     { max: 50000,    rate: 0.15 },
@@ -22,16 +23,24 @@ function calculateSaasCost(transactions) {
     { max: 500000,   rate: 0.08 },
     { max: Infinity, rate: 0.05 },
   ]
-  let remaining = transactions
-  let prev = 0
+  let cost      = SAAS_BASE_FEE
+  let remaining = t
+  let prev      = 0
   for (const tier of tiers) {
     const inTier = Math.min(remaining, tier.max - prev)
-    cost += inTier * tier.rate
+    cost      += inTier * tier.rate
     remaining -= inTier
-    prev = tier.max
+    prev       = tier.max
     if (remaining <= 0) break
   }
   return cost
+}
+
+// ── Fictas monthly plan total (variable — internal only) ────
+function fictasMonthlyTotal(t) {
+  return AZURE_PER_MONTH
+    + MONTHLY_LICENSE
+    + Math.max(0, (t - 50000) * FICTAS_EXTRA_PER_TRANSACTION)
 }
 
 // ── Slider config ───────────────────────────────────────────
@@ -47,13 +56,15 @@ const sliderPct = computed(() =>
   ((transactions.value - MIN) / (MAX - MIN)) * 100
 )
 
-const saasCost       = computed(() => calculateSaasCost(transactions.value))
-const savingsMonthly = computed(() => saasCost.value - TOTAL_MONTHLY)
-const savingsOnetime = computed(() => saasCost.value - TOTAL_ONETIME_AMORT)
+const saasCost        = computed(() => calculateSaasCost(transactions.value))
+const fictasMonthly   = computed(() => fictasMonthlyTotal(transactions.value))
+const savingsMonthly  = computed(() => saasCost.value - fictasMonthly.value)
+const savingsOnetime  = computed(() => saasCost.value - TOTAL_ONETIME_AMORT)
 
 const closestVolume = computed(() =>
   TABLE_VOLUMES.reduce((prev, curr) =>
-    Math.abs(curr - transactions.value) < Math.abs(prev - transactions.value) ? curr : prev
+    Math.abs(curr - transactions.value) < Math.abs(prev - transactions.value)
+      ? curr : prev
   )
 )
 
@@ -119,12 +130,14 @@ function fNum(n) { return Math.round(n).toLocaleString('nl-NL') }
               <p class="text-2xl font-bold text-gray-900 tabular-nums">
                 {{ fEuro(saasCost) }}<span class="text-sm font-normal text-gray-500">/mo</span>
               </p>
-              <p class="text-xs text-gray-400 mt-0.5">{{ fNum(transactions) }} transactions (cumulative tiered rate)</p>
+              <p class="text-xs text-gray-400 mt-0.5">{{ fNum(transactions) }} transactions (cumulative tiered + base fee)</p>
             </div>
 
             <div class="pt-3 border-t border-gray-100">
               <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Your monthly cost</p>
               <p class="text-base font-medium text-gray-400 italic">Contact us for pricing</p>
+              <!-- Per-tx overage note — rate only, no base amounts -->
+              <p class="text-xs text-gray-400 mt-1">Includes €0.02/transaction above 50,000</p>
             </div>
 
             <div class="pt-3 border-t border-gray-100">
@@ -163,12 +176,13 @@ function fNum(n) { return Math.round(n).toLocaleString('nl-NL') }
               <p class="text-2xl font-bold text-white tabular-nums">
                 {{ fEuro(saasCost) }}<span class="text-sm font-normal text-gray-400">/mo</span>
               </p>
-              <p class="text-xs text-gray-500 mt-0.5">{{ fNum(transactions) }} transactions (cumulative tiered rate)</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{ fNum(transactions) }} transactions (cumulative tiered + base fee)</p>
             </div>
 
             <div class="pt-3 border-t border-white/10">
               <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Your monthly cost</p>
               <p class="text-base font-medium text-gray-400 italic">Contact us for pricing</p>
+              <p class="text-xs text-gray-600 mt-1">Fixed cost — no per-transaction overage</p>
             </div>
 
             <div class="pt-3 border-t border-white/10">
@@ -186,18 +200,20 @@ function fNum(n) { return Math.round(n).toLocaleString('nl-NL') }
 
           </div>
         </div>
+
       </div>
 
-      <!-- Note -->
+      <!-- Footer note -->
       <p class="text-xs text-gray-400 text-center mb-10 leading-relaxed">
-        Savings calculated against market average SaaS pricing. License fee available on request.
+        SaaS cost includes €2,750 monthly platform fee plus tiered per-transaction pricing.
+        License fee available on request.
       </p>
 
       <!-- Comparison table -->
       <div>
         <h3 class="text-2xl font-bold text-gray-900 mb-1">Savings at Scale</h3>
         <p class="text-gray-500 text-sm mb-6">
-          Estimated monthly savings vs SaaS — cumulative tiered pricing
+          Estimated monthly savings vs SaaS — cumulative tiered pricing + €2,750 base fee
         </p>
 
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -236,9 +252,9 @@ function fNum(n) { return Math.round(n).toLocaleString('nl-NL') }
 
             <span
               class="text-sm font-bold text-right self-center tabular-nums"
-              :class="(calculateSaasCost(vol) - TOTAL_MONTHLY) >= 0 ? 'text-blue-600' : 'text-gray-400'"
+              :class="(calculateSaasCost(vol) - fictasMonthlyTotal(vol)) >= 0 ? 'text-blue-600' : 'text-gray-400'"
             >
-              {{ (calculateSaasCost(vol) - TOTAL_MONTHLY) >= 0 ? '+' : '' }}{{ fEuro(calculateSaasCost(vol) - TOTAL_MONTHLY) }}
+              {{ (calculateSaasCost(vol) - fictasMonthlyTotal(vol)) >= 0 ? '+' : '' }}{{ fEuro(calculateSaasCost(vol) - fictasMonthlyTotal(vol)) }}
             </span>
 
             <span
