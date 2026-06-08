@@ -1,206 +1,169 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import SectionLabel from '../shared/SectionLabel.vue'
 
-// ── Internal constants — never rendered in the DOM ──────────
-const AZURE_PER_MONTH              = 2100
-const MONTHLY_LICENSE              = 8900
-const ONETIME_LICENSE              = 189000
-const DEPRECIATION_MONTHS         = 60
-const SAAS_BASE_FEE                = 2750
-const FICTAS_EXTRA_PER_TRANSACTION = 0.02   // monthly plan only, above 50 000 tx
+// ── Internal constants — NEVER rendered in the DOM ──────────
+const AZURE_PER_MONTH     = 2100
+const ONETIME_LICENSE     = 189000
+const DEPRECIATION_MONTHS = 60
+const FICTAS_TOTAL        = AZURE_PER_MONTH + (ONETIME_LICENSE / DEPRECIATION_MONTHS)
 
-// One-time amortised total (constant — internal only)
-const TOTAL_ONETIME_AMORT =
-  AZURE_PER_MONTH + ONETIME_LICENSE / DEPRECIATION_MONTHS   // 5 250
+// Traditional Low Cost Processor cost model (competitor — never label or display components)
+const TRAD_PROCESSING_RATE = 0.08
+const TRAD_TOKENISATION    = 2348.40
+const TRAD_SMS             = 352.26
+const TRAD_SETUP_MONTHLY   = 1448.18
+const TRAD_FIXED           = TRAD_TOKENISATION + TRAD_SMS + TRAD_SETUP_MONTHLY
 
-// ── SaaS cost: base fee + cumulative tiered per-tx pricing ──
-function calculateSaasCost(t) {
-  const tiers = [
-    { max: 10000,    rate: 0.20 },
-    { max: 50000,    rate: 0.15 },
-    { max: 200000,   rate: 0.11 },
-    { max: 500000,   rate: 0.08 },
-    { max: Infinity, rate: 0.05 },
-  ]
-  let cost      = SAAS_BASE_FEE
-  let remaining = t
-  let prev      = 0
-  for (const tier of tiers) {
-    const inTier = Math.min(remaining, tier.max - prev)
-    cost      += inTier * tier.rate
-    remaining -= inTier
-    prev       = tier.max
-    if (remaining <= 0) break
-  }
-  return cost
+function calculateTradCost(t) {
+  return t * TRAD_PROCESSING_RATE + TRAD_FIXED
 }
 
-// ── Fictas monthly plan total (variable — internal only) ────
-function fictasMonthlyTotal(t) {
-  return AZURE_PER_MONTH
-    + MONTHLY_LICENSE
-    + Math.max(0, (t - 50000) * FICTAS_EXTRA_PER_TRANSACTION)
-}
+// Break-even: TRAD_FIXED + t × TRAD_RATE = FICTAS_TOTAL
+// → t = (FICTAS_TOTAL − TRAD_FIXED) / TRAD_RATE
+const BREAK_EVEN_VOLUME = Math.ceil(
+  (FICTAS_TOTAL - TRAD_FIXED) / TRAD_PROCESSING_RATE
+)
 
 // ── Slider config ───────────────────────────────────────────
-const MIN = 10000
-const MAX = 1000000
+const MIN  = 1000
+const MAX  = 1000000
+const STEP = 1000
 
 // ── Reactive state ──────────────────────────────────────────
 const transactions = ref(100000)
+
+// Keep value in range when typed manually
+watch(transactions, (val) => {
+  if (val < MIN) transactions.value = MIN
+  if (val > MAX) transactions.value = MAX
+})
 
 // ── Computed ────────────────────────────────────────────────
 const sliderPct = computed(() =>
   ((transactions.value - MIN) / (MAX - MIN)) * 100
 )
 
-const saasCost        = computed(() => calculateSaasCost(transactions.value))
-const fictasMonthly   = computed(() => fictasMonthlyTotal(transactions.value))
-const savingsMonthly  = computed(() => saasCost.value - fictasMonthly.value)
-const savingsOnetime  = computed(() => saasCost.value - TOTAL_ONETIME_AMORT)
+const savings = computed(() =>
+  calculateTradCost(transactions.value) - FICTAS_TOTAL
+)
 
 // ── Format helpers ──────────────────────────────────────────
 function fEuro(val) {
-  const abs = Math.abs(Math.round(val))
-  const str = '€' + abs.toLocaleString('nl-NL')
-  return val < 0 ? '−' + str : str
+  return '€' + Math.round(val).toLocaleString('nl-NL')
 }
-function fNum(n) { return Math.round(n).toLocaleString('nl-NL') }
+function fNum(n) {
+  return Math.round(n).toLocaleString('nl-NL')
+}
 </script>
 
 <template>
   <section class="bg-gray-50 py-24">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
 
       <!-- Header -->
-      <div class="text-center mb-12">
-        <SectionLabel text="Cost Calculator" />
+      <div class="text-center mb-10">
+        <SectionLabel text="ROI Calculator" />
         <h2 class="text-4xl font-bold text-gray-900 mt-4 mb-3">
-          In-house vs. SaaS: Monthly Cost
+          How much could you save?
         </h2>
-        <p class="text-gray-600">Drag the slider to see how Fictas compares at your transaction volume.</p>
+        <p class="text-gray-600">
+          Enter your monthly transaction volume to see your estimated saving.
+        </p>
       </div>
 
-      <!-- Slider card -->
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 px-8 pt-8 pb-7 mb-6">
-        <div class="flex justify-between items-center mb-3">
-          <span class="text-sm font-medium text-gray-700">Monthly Transactions</span>
-          <span class="text-xl font-bold text-gray-900 tabular-nums">{{ fNum(transactions) }}</span>
-        </div>
-        <input
-          v-model.number="transactions"
-          type="range"
-          :min="MIN"
-          :max="MAX"
-          step="5000"
-          class="w-full h-2 rounded-full appearance-none cursor-pointer accent-blue-600"
-          :style="{
-            background: `linear-gradient(to right, #2563eb 0%, #2563eb ${sliderPct}%, #e5e7eb ${sliderPct}%, #e5e7eb 100%)`
-          }"
-        />
-        <div class="flex justify-between mt-1.5">
-          <span class="text-xs text-gray-400">10,000</span>
-          <span class="text-xs text-gray-400">1,000,000</span>
-        </div>
-      </div>
+      <!-- Calculator card -->
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
 
-      <!-- Two-column plan comparison -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+        <!-- Volume input -->
+        <div class="mb-8">
+          <label class="block text-sm font-semibold text-gray-700 mb-4">
+            Monthly transaction volume
+          </label>
 
-        <!-- Monthly Plan -->
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-          <div class="flex items-center gap-2 mb-5">
-            <div class="w-3 h-3 rounded-full bg-blue-500 flex-shrink-0"></div>
-            <h3 class="font-bold text-gray-900 text-base">Monthly Plan</h3>
-          </div>
+          <!-- Slider -->
+          <input
+            v-model.number="transactions"
+            type="range"
+            :min="MIN"
+            :max="MAX"
+            :step="STEP"
+            class="w-full h-2 rounded-full appearance-none cursor-pointer accent-blue-600 mb-4"
+            :style="{
+              background: `linear-gradient(to right, #2563eb 0%, #2563eb ${sliderPct}%, #e5e7eb ${sliderPct}%, #e5e7eb 100%)`
+            }"
+          />
 
-          <div class="space-y-4">
-
-            <div>
-              <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">SaaS equivalent cost</p>
-              <p class="text-2xl font-bold text-gray-900 tabular-nums">
-                {{ fEuro(saasCost) }}<span class="text-sm font-normal text-gray-500">/mo</span>
-              </p>
-              <p class="text-xs text-gray-400 mt-0.5">{{ fNum(transactions) }} transactions (cumulative tiered + base fee)</p>
-            </div>
-
-            <div class="pt-3 border-t border-gray-100">
-              <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Your monthly cost</p>
-              <p class="text-base font-medium text-gray-400 italic">Contact us for pricing</p>
-              <!-- Per-tx overage note — rate only, no base amounts -->
-              <p class="text-xs text-gray-400 mt-1">Includes €0.02/transaction above 50,000</p>
-            </div>
-
-            <div class="pt-3 border-t border-gray-100">
-              <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Monthly savings vs SaaS</p>
-              <p
-                class="text-2xl font-bold tabular-nums"
-                :class="savingsMonthly >= 0 ? 'text-green-600' : 'text-amber-500'"
-              >
-                {{ savingsMonthly >= 0 ? '+' : '' }}{{ fEuro(savingsMonthly) }}
-              </p>
-              <p class="text-xs mt-0.5" :class="savingsMonthly >= 0 ? 'text-green-500' : 'text-amber-400'">
-                {{ savingsMonthly >= 0 ? 'vs SaaS at this volume' : 'SaaS cheaper at this volume' }}
-              </p>
-            </div>
-
+          <!-- Numeric input + label -->
+          <div class="flex items-center gap-3">
+            <input
+              v-model.number="transactions"
+              type="number"
+              :min="MIN"
+              :max="MAX"
+              :step="STEP"
+              class="w-40 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-900 focus:outline-none focus:border-blue-500 transition-colors tabular-nums text-right"
+            />
+            <span class="text-sm text-gray-500">transactions / month</span>
           </div>
         </div>
 
-        <!-- One-time License -->
-        <div class="bg-[#0a1628] rounded-2xl border border-blue-500/30 shadow-lg p-6 relative">
-          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-            <span class="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
-              ★ Best value
-            </span>
-          </div>
+        <!-- Result display -->
+        <div class="rounded-xl border-2 p-8 text-center mb-6 transition-all"
+          :class="savings > 0
+            ? 'bg-green-50 border-green-200'
+            : 'bg-gray-50 border-gray-200'"
+        >
+          <!-- Savings > 0 -->
+          <template v-if="savings > 0">
+            <p class="text-sm font-medium text-green-700 uppercase tracking-wider mb-3">
+              Estimated monthly saving
+            </p>
+            <p class="text-6xl font-bold text-green-600 tabular-nums mb-2">
+              {{ fEuro(savings) }}
+            </p>
+            <p class="text-green-700 text-sm font-medium">per month vs a Traditional Low Cost Processor</p>
+          </template>
 
-          <div class="flex items-center gap-2 mb-5">
-            <div class="w-3 h-3 rounded-full bg-orange-400 flex-shrink-0"></div>
-            <h3 class="font-bold text-white text-base">One-time License</h3>
-          </div>
+          <!-- Savings = 0 -->
+          <template v-else-if="savings === 0">
+            <p class="text-2xl font-bold text-gray-700">Break-even point</p>
+            <p class="text-gray-500 text-sm mt-2">
+              At {{ fNum(transactions) }} transactions/month, costs are equal.
+            </p>
+          </template>
 
-          <div class="space-y-4">
+          <!-- Savings < 0 — never show negative number -->
+          <template v-else>
+            <p class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+              Break-even at
+            </p>
+            <p class="text-4xl font-bold text-gray-800 tabular-nums mb-2">
+              {{ fNum(BREAK_EVEN_VOLUME) }}
+            </p>
+            <p class="text-gray-500 text-sm">
+              transactions / month — increase volume to start saving
+            </p>
+          </template>
+        </div>
 
-            <div>
-              <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">SaaS equivalent cost</p>
-              <p class="text-2xl font-bold text-white tabular-nums">
-                {{ fEuro(saasCost) }}<span class="text-sm font-normal text-gray-400">/mo</span>
-              </p>
-              <p class="text-xs text-gray-500 mt-0.5">{{ fNum(transactions) }} transactions (cumulative tiered + base fee)</p>
-            </div>
+        <!-- Footnote -->
+        <p class="text-xs text-gray-400 text-center leading-relaxed mb-6">
+          Compared to a Traditional Low Cost Processor. Fictas pricing available on request.
+        </p>
 
-            <div class="pt-3 border-t border-white/10">
-              <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Your monthly cost</p>
-              <p class="text-base font-medium text-gray-400 italic">Contact us for pricing</p>
-              <p class="text-xs text-gray-600 mt-1">Fixed cost — no per-transaction overage</p>
-            </div>
-
-            <div class="pt-3 border-t border-white/10">
-              <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Monthly savings vs SaaS</p>
-              <p
-                class="text-2xl font-bold tabular-nums"
-                :class="savingsOnetime >= 0 ? 'text-green-400' : 'text-amber-400'"
-              >
-                {{ savingsOnetime >= 0 ? '+' : '' }}{{ fEuro(savingsOnetime) }}
-              </p>
-              <p class="text-xs mt-0.5" :class="savingsOnetime >= 0 ? 'text-green-500' : 'text-amber-500'">
-                {{ savingsOnetime >= 0 ? 'vs SaaS at this volume' : 'SaaS cheaper at this volume' }}
-              </p>
-            </div>
-
-          </div>
+        <!-- CTA -->
+        <div class="text-center">
+          <RouterLink
+            to="/contact"
+            class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white font-semibold px-8 py-3.5 rounded-xl transition-colors text-sm"
+          >
+            Request Pricing →
+          </RouterLink>
         </div>
 
       </div>
-
-      <!-- Footer note -->
-      <p class="text-xs text-gray-400 text-center leading-relaxed">
-        SaaS cost includes €2,750 monthly platform fee plus tiered per-transaction pricing.
-        License fee available on request.
-      </p>
-
     </div>
   </section>
 </template>
