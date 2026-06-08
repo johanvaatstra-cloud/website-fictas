@@ -7,9 +7,9 @@ import SectionLabel from '../shared/SectionLabel.vue'
 const AZURE_PER_MONTH     = 2100
 const ONETIME_LICENSE     = 189000
 const DEPRECIATION_MONTHS = 60
-const FICTAS_TOTAL        = AZURE_PER_MONTH + (ONETIME_LICENSE / DEPRECIATION_MONTHS)
+const FICTAS_TOTAL        = 7350   // AZURE_PER_MONTH + (ONETIME_LICENSE / DEPRECIATION_MONTHS)
 
-// Traditional Low Cost Processor cost model (competitor — never label or display components)
+// Traditional Low Cost Processor cost model (never display components or source name)
 const TRAD_PROCESSING_RATE = 0.08
 const TRAD_TOKENISATION    = 2348.40
 const TRAD_SMS             = 352.26
@@ -20,9 +20,13 @@ function calculateTradCost(t) {
   return t * TRAD_PROCESSING_RATE + TRAD_FIXED
 }
 
-// Break-even: TRAD_FIXED + t × TRAD_RATE = FICTAS_TOTAL
-// → t = (FICTAS_TOTAL − TRAD_FIXED) / TRAD_RATE
-const BREAK_EVEN_VOLUME = Math.ceil(
+function calculateSavings(t) {
+  return calculateTradCost(t) - FICTAS_TOTAL
+}
+
+// Break-even: first whole-transaction volume where savings > 0
+// = floor((FICTAS_TOTAL − TRAD_FIXED) / TRAD_PROCESSING_RATE) → 40,014
+const BREAK_EVEN_VOLUME = Math.floor(
   (FICTAS_TOTAL - TRAD_FIXED) / TRAD_PROCESSING_RATE
 )
 
@@ -34,7 +38,6 @@ const STEP = 1000
 // ── Reactive state ──────────────────────────────────────────
 const transactions = ref(100000)
 
-// Keep value in range when typed manually
 watch(transactions, (val) => {
   if (val < MIN) transactions.value = MIN
   if (val > MAX) transactions.value = MAX
@@ -44,10 +47,8 @@ watch(transactions, (val) => {
 const sliderPct = computed(() =>
   ((transactions.value - MIN) / (MAX - MIN)) * 100
 )
-
-const savings = computed(() =>
-  calculateTradCost(transactions.value) - FICTAS_TOTAL
-)
+const tradCost = computed(() => calculateTradCost(transactions.value))
+const savings  = computed(() => calculateSavings(transactions.value))
 
 // ── Format helpers ──────────────────────────────────────────
 function fEuro(val) {
@@ -89,13 +90,13 @@ function fNum(n) {
             :min="MIN"
             :max="MAX"
             :step="STEP"
-            class="w-full h-2 rounded-full appearance-none cursor-pointer accent-blue-600 mb-4"
+            class="w-full h-2 rounded-full appearance-none cursor-pointer accent-blue-600 mb-5"
             :style="{
               background: `linear-gradient(to right, #2563eb 0%, #2563eb ${sliderPct}%, #e5e7eb ${sliderPct}%, #e5e7eb 100%)`
             }"
           />
 
-          <!-- Numeric input + label -->
+          <!-- Numeric input + unit label -->
           <div class="flex items-center gap-3">
             <input
               v-model.number="transactions"
@@ -103,54 +104,64 @@ function fNum(n) {
               :min="MIN"
               :max="MAX"
               :step="STEP"
-              class="w-40 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-900 focus:outline-none focus:border-blue-500 transition-colors tabular-nums text-right"
+              class="w-44 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-900 focus:outline-none focus:border-blue-500 transition-colors tabular-nums text-right"
             />
             <span class="text-sm text-gray-500">transactions / month</span>
           </div>
         </div>
 
-        <!-- Result display -->
-        <div class="rounded-xl border-2 p-8 text-center mb-6 transition-all"
-          :class="savings > 0
-            ? 'bg-green-50 border-green-200'
-            : 'bg-gray-50 border-gray-200'"
-        >
-          <!-- Savings > 0 -->
-          <template v-if="savings > 0">
-            <p class="text-sm font-medium text-green-700 uppercase tracking-wider mb-3">
-              Estimated monthly saving
-            </p>
-            <p class="text-6xl font-bold text-green-600 tabular-nums mb-2">
-              {{ fEuro(savings) }}
-            </p>
-            <p class="text-green-700 text-sm font-medium">per month vs a Traditional Low Cost Processor</p>
-          </template>
+        <!-- Two result cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
 
-          <!-- Savings = 0 -->
-          <template v-else-if="savings === 0">
-            <p class="text-2xl font-bold text-gray-700">Break-even point</p>
-            <p class="text-gray-500 text-sm mt-2">
-              At {{ fNum(transactions) }} transactions/month, costs are equal.
+          <!-- Traditional Low Cost Processor cost -->
+          <div class="bg-gray-50 rounded-xl border border-gray-200 p-5">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              Traditional Low Cost Processor
             </p>
-          </template>
+            <p class="text-3xl font-bold text-gray-900 tabular-nums">
+              {{ fEuro(tradCost) }}
+            </p>
+            <p class="text-xs text-gray-400 mt-1">per month</p>
+          </div>
 
-          <!-- Savings < 0 — never show negative number -->
-          <template v-else>
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
-              Break-even at
+          <!-- Estimated monthly savings -->
+          <div
+            class="rounded-xl border p-5 transition-all"
+            :class="savings > 0
+              ? 'bg-green-50 border-green-200'
+              : 'bg-gray-50 border-gray-200'"
+          >
+            <p class="text-xs font-semibold uppercase tracking-wider mb-3"
+              :class="savings > 0 ? 'text-green-700' : 'text-gray-500'"
+            >
+              Your estimated monthly savings
             </p>
-            <p class="text-4xl font-bold text-gray-800 tabular-nums mb-2">
-              {{ fNum(BREAK_EVEN_VOLUME) }}
-            </p>
-            <p class="text-gray-500 text-sm">
-              transactions / month — increase volume to start saving
-            </p>
-          </template>
+
+            <!-- Positive savings -->
+            <template v-if="savings > 0">
+              <p class="text-3xl font-bold text-green-600 tabular-nums">
+                {{ fEuro(savings) }}
+              </p>
+              <p class="text-xs text-green-600 mt-1">per month with Fictas</p>
+            </template>
+
+            <!-- Break-even or negative — never show a negative number -->
+            <template v-else>
+              <p class="text-sm font-semibold text-gray-700 leading-snug">
+                Break-even at
+              </p>
+              <p class="text-2xl font-bold text-gray-800 tabular-nums">
+                {{ fNum(BREAK_EVEN_VOLUME) }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">transactions / month</p>
+            </template>
+          </div>
+
         </div>
 
         <!-- Footnote -->
         <p class="text-xs text-gray-400 text-center leading-relaxed mb-6">
-          Compared to a Traditional Low Cost Processor. Fictas pricing available on request.
+          Based on standard Traditional Low Cost Processor pricing. Fictas pricing available on request.
         </p>
 
         <!-- CTA -->
